@@ -171,8 +171,9 @@
   .card > header { margin-top: 14px; }
   .card > .content { margin-top: 6px; }
   /* Lukket nyhed: alle kort har samme faste højde, og teksten fylder resten af kortet */
-  .card:not(.is-open):has(> .thumb) { height: calc((100cqi - 40px) * 9 / 16 + 244px); }
-  .card:not(.is-open) > .content { flex: 1 1 0; min-height: 0; container-type: size; }
+  /* min-height og to linjers mindstehøjde: forstørrer man kun teksten, vokser kortet i stedet for at skjule teksten */
+  .card:not(.is-open):has(> .thumb) { min-height: calc((100cqi - 40px) * 9 / 16 + 244px); }
+  .card:not(.is-open) > .content { flex: 1 1 0; min-height: 3em; container-type: size; }
 
   .date { display: block; margin-top: 4px; font-size: 13px; line-height: 1.4; color: var(--muted); }
   .card h2 {
@@ -184,9 +185,12 @@
   .card h2 a { color: inherit; text-decoration: none; }
   .card h2 a:hover, .card:has(> .thumb:hover) h2 a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
   .card:has(h2 a:hover) .thumb img { border-color: var(--green); }
+  /* Fokusringen tegnes på selve overskriften, ellers skærer den afkortede overskrift ringen af */
+  .card h2:has(a:focus-visible) { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 4px; }
+  .card h2 a:focus-visible { outline: none; color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
 
   /* Teksten. Lukket: så mange hele linjer, som der er plads til, med "Læs mere" for enden af sidste linje */
-  .body { --toggle-w: 112px; position: relative; color: var(--muted); line-height: 1.5; text-wrap: pretty; }
+  .body { --toggle-w: 7.5em; position: relative; color: var(--muted); line-height: 1.5; text-wrap: pretty; }
   .body > p { margin: 0; }
   .card:not(.is-open) .body {
     height: calc(4 * 1lh);              /* reserve for browsere uden round() */
@@ -211,7 +215,7 @@
   /* Samme bredde og højrestillet i begge tilstande, så knappen kun flytter sig lodret */
   .toggle {
     display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; padding: 0;
-    width: var(--toggle-w);
+    width: var(--toggle-w); white-space: nowrap;
     font: inherit; font-weight: 600; line-height: 1.5; color: var(--green);
     background: none; border: 0; cursor: pointer;
   }
@@ -232,7 +236,7 @@
       display: grid; grid-template-columns: 224px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
       column-gap: 24px; padding: 20px 24px;
     }
-    .card:not(.is-open):has(> .thumb) { height: 208px; }   /* billedets højde (168 px) + luft */
+    .card:not(.is-open):has(> .thumb) { min-height: 208px; }   /* billedets højde (168 px) + luft */
     .card:has(> .thumb) > .thumb { grid-column: 1; grid-row: 1 / span 2; align-self: start; }
     .card:has(> .thumb) .thumb img { aspect-ratio: 4 / 3; }
     .card:has(> .thumb) > :is(header, .content) { grid-column: 2; }
@@ -241,13 +245,29 @@
 
   @media (prefers-reduced-motion: reduce) {
     ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
-    .toggle svg, .sort::picker-icon { transition: none; }
+    .toggle svg { transition: none; }
+  }
+  /* For sig selv, så browsere uden ::picker-icon ikke smider reglen ovenfor væk */
+  @media (prefers-reduced-motion: reduce) { .sort::picker-icon { transition: none; } }
+
+  /* Siden selv kan få fokus (se openNb), men skal ikke have en ring om det hele */
+  body:focus { outline: none; }
+
+  /* Mobil og tablet: felter under 16 px får iPhone til at zoome ind, når man trykker på dem */
+  @media (pointer: coarse) { .nb .nb-row input, .toolbar .sort { font-size: 16px; } }
+
+  /* Kontrasttema i Windows fjerner skygger, så boks, fane og knapper får en kant */
+  @media (forced-colors: active) {
+    .nb { border: 1px solid CanvasText; }
+    .nb-tab, .sort, .more-btn, .nb-row button { border: 1px solid ButtonText; }
+    .nb-row input { border-right: 1px solid FieldText; }
   }
 
   /* ---------- Sidefod (som i dag) ---------- */
   .site-footer { background: var(--footer); color: #fff; }
+  /* Ekstra plads i bunden, mens nyhedsbrev-boksen eller fanen vises, så de ikke dækker sidefodens links */
   .site-footer .inner {
-    max-width: 1180px; margin: 0 auto; padding: 20px 24px;
+    max-width: 1180px; margin: 0 auto; padding: 20px 24px calc(20px + var(--nb-room, 0px));
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
   }
   .site-footer a { color: #fff; text-decoration: none; }
@@ -309,8 +329,12 @@
   .nb-error { display: none; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 13px; color: #B3261E; }
   .nb-form:has(input:user-invalid) .nb-error { display: flex; }
   .nb-small { margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  /* Står altid i siden (0 px høj, når den er tom), så skærmlæsere opdager takken */
   .nb-done { margin: 0; font-size: 14px; line-height: 1.5; }
-  .nb-done:empty { display: none; }
+  /* Sorterings-animationen må ikke tegne kortene oven på boksen og fanen */
+  .nb { view-transition-name: nyhedsbrev; }
+  .nb-tab { view-transition-name: nyhedsbrev-fane; }
+  ::view-transition-group(nyhedsbrev), ::view-transition-group(nyhedsbrev-fane) { z-index: 1; }
 
   .nb-tab {
     position: fixed; right: 0; bottom: 24px; z-index: 45;
@@ -567,6 +591,8 @@
   const listEl = document.getElementById('list');
   const sortEl = document.getElementById('sort');
   const statusEl = document.getElementById('status');
+  // Firefox husker menuens valg ved genindlæsning, men listen starter altid med de nyeste
+  sortEl.value = 'newest';
 
   // Alle nyheder har samme opbygning: billede, dato, titel og så meget tekst, som der er plads til.
   // "Læs mere" folder resten af teksten og knappen videre ud.
@@ -697,24 +723,39 @@
   const NB_KEY = 'av-nyhedsbrev';   // tom: vis boksen, 'lukket': vis fanen, 'tilmeldt': vis intet
   const canPopover = Object.hasOwn(HTMLElement.prototype, 'popover');
 
-  const nbState = () => { try { return localStorage.getItem(NB_KEY); } catch (e) { return null; } };
-  const setNbState = (v) => { try { if (v) localStorage.setItem(NB_KEY, v); else localStorage.removeItem(NB_KEY); } catch (e) { /* ignorer */ } };
+  // Tilstanden huskes også i hukommelsen, så den virker, selvom browseren blokerer localStorage
+  let nbMem = null;
+  try { nbMem = localStorage.getItem(NB_KEY); } catch (e) { /* ignorer */ }
+  const nbState = () => nbMem;
+  const setNbState = (v) => {
+    nbMem = v || null;
+    try { if (v) localStorage.setItem(NB_KEY, v); else localStorage.removeItem(NB_KEY); } catch (e) { /* ignorer */ }
+  };
   const nbIsOpen = () => (canPopover ? nb.matches(':popover-open') : nb.open);
-  // Plads i bunden, så et element man tabber til, ikke ender skjult under boksen eller fanen
-  const setScrollRoom = (px) => { document.documentElement.style.scrollPaddingBottom = px ? `${px}px` : ''; };
+  // Plads i bunden, så et element man tabber til, ikke ender skjult under boksen eller fanen.
+  // --nb-room giver sidefoden samme ekstra plads, så man også kan scrolle den fri af boksen.
+  const setScrollRoom = (px) => {
+    const root = document.documentElement.style;
+    root.scrollPaddingBottom = px ? `${px}px` : '';
+    root.setProperty('--nb-room', `${px || 0}px`);
+  };
 
   function openNb(focus) {
     const prev = document.activeElement;
+    nb.removeAttribute('data-closing');   // åbnes boksen igen midt i lukningen, skal lukningen afbrydes
     nbTab.classList.remove('is-shown');
     if (!nbIsOpen()) { if (canPopover) nb.showPopover(); else nb.show(); }
     setScrollRoom(nb.offsetHeight + 36);
     if (focus) { nbEmail.focus(); return; }
-    // Åbner boksen af sig selv, må den ikke tage fokus fra det, man er i gang med
+    // Åbner boksen af sig selv, må den ikke tage fokus fra det, man er i gang med.
+    // Fokus sættes på selve siden, så første Tab starter fra toppen og ikke inde i boksen.
     if (nb.contains(document.activeElement)) {
       if (prev && prev !== document.body && prev.isConnected) prev.focus({ preventScroll: true });
-      else document.activeElement.blur();
+      else { document.body.tabIndex = -1; document.body.focus({ preventScroll: true }); document.body.removeAttribute('tabindex'); }
     }
   }
+  // Pladsen i bunden følger med, når boksen bliver højere (fx når fejlteksten vises)
+  new ResizeObserver(() => { if (nbIsOpen() && !nb.hasAttribute('data-closing')) setScrollRoom(nb.offsetHeight + 36); }).observe(nb);
 
   // Lukning med animation, også hvor browseren ikke kan animere ud af det øverste lag
   let displayTransition;
@@ -744,7 +785,11 @@
   function minimizeNb() {
     const hadFocus = nb.contains(document.activeElement);
     hideNb();
-    if (nbState() === 'tilmeldt') { setScrollRoom(0); return; }
+    if (nbState() === 'tilmeldt') {
+      setScrollRoom(0);
+      if (hadFocus) document.querySelector('.intro a').focus();   // fokus må ikke forsvinde med boksen
+      return;
+    }
     setNbState('lukket');
     nbTab.classList.add('is-shown');
     setScrollRoom(72);
@@ -770,7 +815,16 @@
   // Den slås fra, så man kun ser den danske fejltekst under feltet.
   nbEmail.addEventListener('invalid', (e) => {
     e.preventDefault();
+    // Fejlen kobles på feltet, før det får fokus, så skærmlæsere læser den op
+    const alreadyFocused = document.activeElement === nbEmail;
+    nbEmail.setAttribute('aria-invalid', 'true');
+    nbEmail.setAttribute('aria-describedby', 'nb-error');
     nbEmail.focus();
+    // Står man allerede i feltet (Enter), flytter fokus sig ikke, så fejlen meldes via statuslinjen
+    if (alreadyFocused) {
+      statusEl.textContent = '';
+      setTimeout(() => { statusEl.textContent = 'Fejl: Skriv en gyldig e-mailadresse, fx navn@kommune.dk.'; }, 60);
+    }
     requestAnimationFrame(syncEmail);
   });
 
@@ -780,6 +834,8 @@
     nbSignup.hidden = true;
     nbDone.textContent = 'Tak for din tilmelding. Tjek din indbakke eller spam mappe for at bekræfte din tilmelding.';
     setNbState('tilmeldt');
+    // Fokus bliver i boksen (på krydset), så Escape stadig virker og fokus ikke forsvinder
+    nb.querySelector('.nb-close').focus();
   });
 
   document.getElementById('nb-reset').addEventListener('click', () => {
