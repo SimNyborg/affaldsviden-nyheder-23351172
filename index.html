@@ -96,6 +96,17 @@
   /* Tip nederst på siden, så det ikke tager plads fra nyhederne */
   .tip { margin: 20px 0 0; font-size: 14px; color: var(--muted); text-align: center; text-wrap: pretty; }
 
+  /* "Vis flere nyheder": diskret knap under listen, kun når der er flere end 30 nyheder */
+  .more-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 20px; }
+  .more-wrap[hidden] { display: none; }
+  .more-info { margin: 0; font-size: 13px; color: var(--muted); }
+  .more-btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px;
+    font: inherit; font-size: 14px; font-weight: 600; color: var(--green);
+    background: var(--card); border: 0; border-radius: 8px; box-shadow: var(--shadow); cursor: pointer;
+  }
+  .more-btn:hover { box-shadow: 0 0 0 1px var(--green), 0 1px 3px rgba(0, 0, 0, .08); }
+
   /* ---------- Sortering ---------- */
   .toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: 20px 0 12px; }
   .toolbar label { font-size: 14px; color: var(--muted); }
@@ -332,7 +343,10 @@
   }
   .mockup-bar strong { letter-spacing: .04em; text-transform: uppercase; font-size: 11px; opacity: .75; }
   .mockup-bar :is(a, button) { font: inherit; color: #CFE7D6; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
-  @media (max-width: 520px) { .mockup-bar strong { display: none; } }
+  @media (max-width: 520px) {
+    .mockup-bar { right: 16px; flex-wrap: wrap; row-gap: 4px; border-radius: 16px; }
+    .mockup-bar strong { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -381,6 +395,12 @@
     <p class="sr-only" id="status" role="status"></p>
 
     <ul class="news-list" id="list" aria-labelledby="sidetitel"></ul>
+    <div class="more-wrap" id="more-wrap" hidden>
+      <p class="more-info" id="more-info"></p>
+      <button type="button" class="more-btn" id="more-btn">Vis flere nyheder
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg>
+      </button>
+    </div>
     <p class="tip">Har du et tip til en problemstilling eller et værktøj vi skal undersøge nærmere, er du altid velkommen til at kontakte os på <a href="mailto:jhn@jhn.dk">jhn@jhn.dk</a>.</p>
   </div>
 </main>
@@ -424,6 +444,7 @@
   <strong>Mockup</strong>
   <a href="https://affaldsviden.info/nyheder/">Nuværende side ↗</a>
   <button type="button" id="nb-reset">Vis popup igen</button>
+  <a id="demo-link" target="_self" href="?demo=45">Vis med 45 nyheder</a>
 </div>
 
 <script>
@@ -518,6 +539,23 @@
     },
   ];
 
+  // Kun i mockuppen: ?demo=45 fylder listen op med eksempelnyheder, så man kan se "Vis flere nyheder"
+  const DEMO = Math.min(Number(new URLSearchParams(location.search).get('demo')) || 0, 200);
+  if (DEMO > NEWS.length) {
+    const real = NEWS.slice();
+    for (let k = 0; NEWS.length < DEMO; k++) {
+      const src = real[k % real.length];
+      const d = new Date(2025, 4 - k, 15);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      NEWS.push({
+        id: `eksempel-${k + 1}`, date: iso, title: `Eksempelnyhed ${k + 1}`,
+        img: src.img, pos: src.pos,
+        teaser: 'Denne nyhed er kun med i mockuppen for at vise, hvordan siden ser ud, når der er mange nyheder.',
+        more: [], cta: src.cta,
+      });
+    }
+  }
+
   const ICON = {
     chev: '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg>',
   };
@@ -588,6 +626,28 @@
   listEl.innerHTML = NEWS.map((n, i) =>
     `<li class="news-item" data-date="${n.date}" data-order="${i}">${cardHTML(n, i)}</li>`).join('');
 
+  // Højst 30 nyheder ad gangen. "Vis flere nyheder" viser de næste 30.
+  const PAGE = 30;
+  let shown = PAGE;
+  const moreWrap = document.getElementById('more-wrap');
+  const moreInfo = document.getElementById('more-info');
+  function applyLimit() {
+    const items = [...listEl.children];
+    items.forEach((li, idx) => { li.hidden = idx >= shown; });
+    moreWrap.hidden = items.length <= shown;
+    moreInfo.textContent = `Viser ${Math.min(shown, items.length)} af ${items.length} nyheder`;
+  }
+  applyLimit();
+  document.getElementById('more-btn').addEventListener('click', () => {
+    const firstNew = listEl.children[shown];
+    shown += PAGE;
+    applyLimit();
+    refreshCards();
+    // Fokus på den første nye nyhed, så man fortsætter derfra med tastaturet
+    if (firstNew) firstNew.querySelector('h2 a').focus();
+    statusEl.textContent = `Viser ${Math.min(shown, listEl.children.length)} af ${listEl.children.length} nyheder`;
+  });
+
   listEl.addEventListener('click', (e) => {
     const btn = e.target.closest('.toggle');
     if (!btn) return;
@@ -612,7 +672,8 @@
       const byOrder = a.dataset.order - b.dataset.order;
       return order === 'oldest' ? (byDate || -byOrder) : (-byDate || byOrder);
     });
-    const update = () => reorder(listEl, nodes);
+    // Efter sortering vises de første nyheder i den nye rækkefølge
+    const update = () => { reorder(listEl, nodes); applyLimit(); refreshCards(); };
     if (listEl.startViewTransition) listEl.startViewTransition(update);
     else if (document.startViewTransition) document.startViewTransition(update);
     else update();
@@ -733,6 +794,10 @@
   // Boksen er foldet ud fra start. Folder man den ind, ses kun fanen, også næste gang.
   if (nbState() === 'lukket') { nbTab.classList.add('is-shown'); setScrollRoom(72); }
   else if (nbState() !== 'tilmeldt') openNb(false);
+
+  // Mockup-panelet skifter mellem de rigtige nyheder og 45 nyheder med eksempler
+  const demoLink = document.getElementById('demo-link');
+  if (DEMO) { demoLink.textContent = 'Vis de rigtige nyheder'; demoLink.href = location.pathname; }
 </script>
 </body>
 </html>
