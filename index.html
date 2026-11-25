@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Nyheder – Affaldsviden (mockup)</title>
+<base target="_blank">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+<style>
+  /* Farver og mål er aflæst fra Affaldsfeed og forsiden på affaldsviden.info */
+  :root {
+    --green: #0A602D;        /* mørkegrøn: knapper og links */
+    --green-hover: #084C24;
+    --green-soft: #E6F4EA;   /* lysegrøn: hover i sorteringsmenuen */
+    --lime: #95C41F;         /* logo og aktivt menupunkt */
+    --page: #DAE0E0;         /* sidebaggrund som på Affaldsfeed */
+    --card: #FFFFFF;
+    --ink: #222222;
+    --muted: #565656;
+    --line: #E2E7E7;
+    --footer: #54595F;
+    --radius: 12px;
+    --shadow: 0 0 0 1px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .08);
+    --wrap: 960px;
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%230A602D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Open Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--page);
+  }
+  img { display: block; max-width: 100%; }
+  a { color: var(--green); }
+  :focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- Sidehoved (gengivet som på sitet i dag) ---------- */
+  .site-header { background: #fff; box-shadow: 0 1px 0 rgba(0, 0, 0, .06); }
+  .site-header .inner {
+    max-width: 1180px; height: 90px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .logo { margin-right: auto; }
+  .logo img { height: 27px; width: auto; }
+  .main-nav { display: flex; align-self: stretch; }
+  .main-nav a {
+    position: relative; display: flex; align-items: center; gap: 6px;
+    padding: 0 16px; font-size: 17px; color: var(--ink); text-decoration: none; white-space: nowrap;
+  }
+  .main-nav a[href]:hover { color: var(--green); }
+  .main-nav a[aria-current="page"] { background: var(--lime); color: #fff; }
+  .nav-badge {
+    position: absolute; top: 13px; right: 8px;
+    font-size: 11px; line-height: 1; font-weight: 700; color: #fff;
+    background: var(--green); border-radius: 999px; padding: 3px 7px;
+  }
+  .hdr-tools { display: flex; align-items: center; gap: 14px; }
+  .icon-btn {
+    display: inline-grid; place-items: center; width: 40px; height: 40px;
+    border: 0; background: none; color: #555; border-radius: 50%; cursor: pointer;
+  }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+    background: #7884C6; color: #1D2550; font-size: 17px; box-shadow: 0 0 0 2px #E6E8F3;
+  }
+  .burger { display: none; }
+  @media (max-width: 1000px) {
+    .main-nav, .bell { display: none; }
+    .burger { display: inline-grid; }
+  }
+
+  /* ---------- Side ---------- */
+  .page { padding: 32px 16px 112px; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; }
+
+  /* Kompakt sidehoved direkte på baggrunden. Nyhedsbrevet er et link sidst i sætningen som på den gamle side */
+  .intro h1 {
+    margin: 0; font-size: clamp(28px, 1.1rem + 1.3vw, 34px);
+    line-height: 1.2; font-weight: 600; letter-spacing: -.01em; text-wrap: balance;
+  }
+  .intro p { margin: 4px 0 0; color: var(--muted); text-wrap: pretty; }
+  .intro a { font-weight: 600; text-underline-offset: 3px; }
+
+  /* Tip nederst på siden, så det ikke tager plads fra nyhederne */
+  .tip { margin: 20px 0 0; font-size: 14px; color: var(--muted); text-align: center; text-wrap: pretty; }
+
+  /* ---------- Sortering ---------- */
+  .toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: 20px 0 12px; }
+  .toolbar label { font-size: 14px; color: var(--muted); }
+  .sort {
+    appearance: none; min-width: 10em; height: 34px; padding: 0 34px 0 12px;
+    font: inherit; font-size: 14px; color: var(--ink); cursor: pointer;
+    background: var(--card) var(--chevron) no-repeat right 12px center / 14px;
+    border: 0; border-radius: 8px; box-shadow: var(--shadow);
+  }
+  .sort:hover { box-shadow: 0 0 0 1px var(--green), 0 1px 3px rgba(0, 0, 0, .08); }
+  /* Hvor browseren kan det, får også selve listen sitets stil. Andre browsere viser deres egen liste. */
+  @supports (appearance: base-select) {
+    .sort, .sort::picker(select) { appearance: base-select; }
+    .sort { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; background-image: none; }
+    /* Samme tynde pil som ellers i designet i stedet for browserens trekant */
+    .sort::picker-icon {
+      content: ""; display: block; width: 14px; height: 14px;
+      background: var(--chevron) center / 14px no-repeat;
+      transition: rotate .2s ease;
+    }
+    .sort:open::picker-icon { rotate: 180deg; }
+    /* Listen åbner nedad, også når der tilfældigvis er mere plads over menuen */
+    .sort::picker(select) {
+      position-try-order: normal;
+      margin-top: 6px; padding: 6px; border: 0; border-radius: 10px; background: var(--card);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .14);
+    }
+    .sort option { gap: 8px; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+    .sort option:hover, .sort option:focus-visible { background: var(--green-soft); }
+    .sort option:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+    .sort option:checked { font-weight: 600; }
+    .sort option::checkmark { color: var(--green); }
+  }
+
+  /* ---------- Nyhedsliste: alle nyheder har samme opbygning og størrelse ---------- */
+  .news-list {
+    list-style: none; margin: 0; padding: 0;
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+  .news-item { container-type: inline-size; view-transition-name: match-element; }
+  .news-item + .news-item { border-top: 1px solid var(--line); }
+
+  /* Smal beholder (mobil): billedet øverst, tekst under */
+  .card { display: flex; flex-direction: column; padding: 20px; }
+  /* Billedet er et link til samme sted som linket i nyheden, som på den gamle side */
+  .card > .thumb { position: relative; display: block; border-radius: 8px; }
+  /* Afholdte arrangementer får et lille, diskret mærke i billedets hjørne */
+  .stamp {
+    position: absolute; left: 8px; top: 8px;
+    padding: 0 8px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; line-height: 20px;
+    color: #2F3A35; background: rgba(255, 255, 255, .9);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+    pointer-events: none;
+  }
+  .thumb img {
+    width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
+    background: #EEF2F2; border: 1px solid var(--line); border-radius: 8px;
+    transition: border-color .15s ease;
+  }
+  .thumb:hover img { border-color: var(--green); }
+  .card > header { margin-top: 14px; }
+  .card > .content { margin-top: 6px; }
+  /* Lukket nyhed: alle kort har samme faste højde, og teksten fylder resten af kortet */
+  .card:not(.is-open):has(> .thumb) { height: calc((100cqi - 40px) * 9 / 16 + 244px); }
+  .card:not(.is-open) > .content { flex: 1 1 0; min-height: 0; container-type: size; }
+
+  .date { display: block; margin-top: 4px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+  .card h2 {
+    margin: 0; font-size: 18px; line-height: 1.3; font-weight: 600; text-wrap: balance;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  }
+  .card.is-open h2 { display: block; -webkit-line-clamp: none; overflow: visible; }
+  /* Overskrift og billede fører samme sted hen, og de lyser op sammen */
+  .card h2 a { color: inherit; text-decoration: none; }
+  .card h2 a:hover, .card:has(> .thumb:hover) h2 a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+  .card:has(h2 a:hover) .thumb img { border-color: var(--green); }
+
+  /* Teksten. Lukket: så mange hele linjer, som der er plads til, med "Læs mere" for enden af sidste linje */
+  .body { --toggle-w: 112px; position: relative; color: var(--muted); line-height: 1.5; text-wrap: pretty; }
+  .body > p { margin: 0; }
+  .card:not(.is-open) .body {
+    height: calc(4 * 1lh);              /* reserve for browsere uden round() */
+    height: round(down, 100cqb, 1lh);   /* rundet ned til hele linjer, så ingen linje skæres over */
+    overflow: clip;
+  }
+  .card:not(.is-open) .body > p { display: inline; }
+  .card:not(.is-open) .body > p + p::before { content: " "; }
+  .card:not(.is-open) .cta { display: none; }
+  /* En usynlig afstandsklods skubber pladsholderen ned på sidste linje, så teksten bryder før "Læs mere" */
+  .card:not(.is-open) .body::before { content: ""; float: right; width: 0; height: calc(100% - 1lh); }
+  .slot { float: right; clear: right; width: var(--toggle-w); height: 1lh; }
+  .card.is-open .slot { display: none; }
+  .card.is-open .body > p + p { margin-top: 10px; }
+  /* Udfoldet: linket videre til venstre og "Vis mindre" til højre, lodret under hvor "Læs mere" stod */
+  .card.is-open .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 14px; }
+  .cta { margin: 0; }
+  /* Linket videre er et almindeligt link, ikke en stor knap */
+  .go { font-weight: 600; text-underline-offset: 3px; }
+  .go:hover { text-decoration-thickness: 2px; }
+
+  /* Samme bredde og højrestillet i begge tilstande, så knappen kun flytter sig lodret */
+  .toggle {
+    display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; padding: 0;
+    width: var(--toggle-w);
+    font: inherit; font-weight: 600; line-height: 1.5; color: var(--green);
+    background: none; border: 0; cursor: pointer;
+  }
+  .card:not(.is-open) .toggle { position: absolute; right: 0; bottom: 0; height: 1lh; background: var(--card); }
+  .card:not(.is-open) .toggle:focus-visible { outline-offset: -3px; border-radius: 4px; }
+  .card.is-open .toggle { margin-left: auto; }
+  .toggle .dots { margin-right: 4px; font-weight: 400; color: var(--muted); }
+  .card:not(.is-clamped) .toggle .dots, .card.is-open .toggle .dots { display: none; }
+  /* Kan hele teksten ses, er der intet at folde ud: man kommer videre via billedet og overskriften */
+  .card.no-more :is(.slot, .toggle) { display: none; }
+  .toggle:hover .lbl { text-decoration: underline; text-underline-offset: 3px; }
+  .toggle svg { transition: transform .2s ease; }
+  .card.is-open .toggle svg { transform: rotate(180deg); }
+
+  /* Bred beholder: billedet til venstre i fast størrelse, så alle rækker er lige høje */
+  @container (min-width: 600px) {
+    .card:has(> .thumb) {
+      display: grid; grid-template-columns: 224px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+      column-gap: 24px; padding: 20px 24px;
+    }
+    .card:not(.is-open):has(> .thumb) { height: 208px; }   /* billedets højde (168 px) + luft */
+    .card:has(> .thumb) > .thumb { grid-column: 1; grid-row: 1 / span 2; align-self: start; }
+    .card:has(> .thumb) .thumb img { aspect-ratio: 4 / 3; }
+    .card:has(> .thumb) > :is(header, .content) { grid-column: 2; }
+    .card:has(> .thumb) > header { margin-top: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+    .toggle svg, .sort::picker-icon { transition: none; }
+  }
+
+  /* ---------- Sidefod (som i dag) ---------- */
+  .site-footer { background: var(--footer); color: #fff; }
+  .site-footer .inner {
+    max-width: 1180px; margin: 0 auto; padding: 20px 24px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .site-footer a { color: #fff; text-decoration: none; }
+  .site-footer .c { text-align: center; }
+  .site-footer .r { text-align: right; }
+  @media (max-width: 640px) {
+    .site-footer .inner { grid-template-columns: 1fr; }
+    .site-footer .c, .site-footer .r { text-align: left; }
+  }
+
+  /* ---------- Nyhedsbrev: lille boks i hjørnet, der lægges væk som en fane ---------- */
+  .nb {
+    position: fixed; inset: auto 20px 20px auto; margin: 0;
+    width: min(340px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto;
+    padding: 20px 20px 18px; border: 0; border-radius: 12px;
+    background: var(--card); color: var(--ink);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .06), 0 10px 30px rgba(0, 0, 0, .14);
+    opacity: 0;
+    transition-property: opacity, transform, display, overlay;
+    transition-duration: .25s;
+    transition-timing-function: ease-out;
+    transition-behavior: allow-discrete;
+  }
+  .nb:is(:popover-open, [open]):where(:not([data-closing])) {
+    opacity: 1;
+    @starting-style { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nb { transform: translateY(12px); }
+    .nb:is(:popover-open, [open]):where(:not([data-closing])) {
+      transform: none;
+      @starting-style { transform: translateY(12px); }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) { .nb { transition-duration: .1s; } }
+
+  .nb h2 { margin: 0 40px 14px 0; font-size: 16px; line-height: 1.35; font-weight: 600; }
+  .nb-close {
+    position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
+    display: grid; place-items: center; padding: 0;
+    color: var(--muted); background: none; border: 0; border-radius: 8px; cursor: pointer;
+  }
+  .nb-close:hover { color: var(--ink); background: #F1F4F4; }
+  .nb-row { display: flex; }
+  .nb-row input {
+    flex: 1; min-width: 0; height: 40px; padding: 0 12px;
+    font: inherit; font-size: 14px; color: var(--ink); background: #fff;
+    border: 1px solid #C5CECE; border-right: 0; border-radius: 8px 0 0 8px;
+  }
+  .nb-row input:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+  .nb-row button {
+    flex: none; height: 40px; padding: 0 16px;
+    font: inherit; font-size: 14px; font-weight: 600; color: #fff;
+    background: var(--green); border: 0; border-radius: 0 8px 8px 0; cursor: pointer;
+  }
+  .nb-row button:hover { background: var(--green-hover); }
+  /* Fejlen vises først, når man har skrevet noget forkert eller prøvet at tilmelde sig */
+  .nb-row input:user-invalid { border-color: #B3261E; background: #FDF3F2; }
+  .nb-error { display: none; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 13px; color: #B3261E; }
+  .nb-form:has(input:user-invalid) .nb-error { display: flex; }
+  .nb-small { margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  .nb-done { margin: 0; font-size: 14px; line-height: 1.5; }
+  .nb-done:empty { display: none; }
+
+  .nb-tab {
+    position: fixed; right: 0; bottom: 24px; z-index: 45;
+    display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 12px;
+    font: inherit; font-size: 14px; font-weight: 600; color: var(--green);
+    background: var(--card); border: 0; border-radius: 10px 0 0 10px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .06), 0 4px 14px rgba(0, 0, 0, .12);
+    cursor: pointer;
+    visibility: hidden; opacity: 0;
+    transition: opacity .2s ease-out, visibility 0s linear .2s;
+  }
+  .nb-tab.is-shown { visibility: visible; opacity: 1; transition: opacity .2s ease-out, visibility 0s; }
+  .nb-tab:hover { background: #F4F8F5; }
+  .nb-tab:focus-visible { outline-offset: -3px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .nb-tab { transform: translateX(100%); transition: transform .25s ease-out, opacity .2s ease-out, visibility 0s linear .25s; }
+    .nb-tab.is-shown { transform: none; transition: transform .25s ease-out, opacity .2s ease-out, visibility 0s; }
+  }
+  @media (max-width: 520px) {
+    .nb { inset: auto 16px 16px 16px; width: auto; }
+    .nb-tab { bottom: 72px; }   /* kun i mockuppen, så fanen ikke ligger oven på mockup-panelet */
+  }
+
+  /* ---------- Mockup-panel (ikke en del af designet) ---------- */
+  .mockup-bar {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; border-radius: 999px;
+    background: #1F2A24; color: #fff; font-size: 13px; box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+  }
+  .mockup-bar strong { letter-spacing: .04em; text-transform: uppercase; font-size: 11px; opacity: .75; }
+  .mockup-bar :is(a, button) { font: inherit; color: #CFE7D6; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+  @media (max-width: 520px) { .mockup-bar strong { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="logo" href="https://affaldsviden.info/">
+      <img src="https://affaldsviden.info/wp-content/uploads/2025/09/cropped-AV_logo_RGB_uden_slogan-2048x253-1.png" alt="Affaldsviden">
+    </a>
+    <nav class="main-nav" aria-label="Hovedmenu">
+      <a href="https://affaldsviden.info/om/">Om</a>
+      <a href="https://affaldsviden.info/netvaerk/">Netværk</a>
+      <a aria-current="page">Nyheder</a>
+      <a href="https://affaldsviden.info/affaldsfeed/">Affaldsfeed<span class="nav-badge">Nyt</span></a>
+      <a href="https://affaldsviden.info/adgang-for-alle/">For alle</a>
+      <a>Mine Projekter
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg>
+        <span class="nav-badge">Nyt</span></a>
+    </nav>
+    <div class="hdr-tools">
+      <button class="icon-btn bell" type="button" aria-label="Notifikationer">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
+      <span class="avatar" aria-hidden="true">SN</span>
+      <button class="icon-btn burger" type="button" aria-label="Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <section class="intro" aria-labelledby="sidetitel">
+      <h1 id="sidetitel">Nyheder fra Affaldsviden</h1>
+      <p>Her finder du de seneste nyheder og opdateringer til Affaldsviden. Du kan også tilmelde dig vores nyhedsbrev <a href="https://affaldsviden.info/tilmeld-nyhedsbrev/">her</a>.</p>
+    </section>
+
+    <div class="toolbar">
+      <label for="sort">Sortér</label>
+      <select class="sort" id="sort" name="sortering">
+        <option value="newest" selected>Nyeste først</option>
+        <option value="oldest">Ældste først</option>
+      </select>
+    </div>
+    <p class="sr-only" id="status" role="status"></p>
+
+    <ul class="news-list" id="list" aria-labelledby="sidetitel"></ul>
+    <p class="tip">Har du et tip til en problemstilling eller et værktøj vi skal undersøge nærmere, er du altid velkommen til at kontakte os på <a href="mailto:jhn@jhn.dk">jhn@jhn.dk</a>.</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div><a href="mailto:jhn@jhn.dk">jhn@jhn.dk</a><br>2622 2727</div>
+    <div class="c">Orla Lehmannsgade 5<br>7100 Vejle</div>
+    <div class="r">Affaldsviden.dk<br><a href="https://affaldsviden.info/">Privatlivspolitik</a></div>
+  </div>
+</footer>
+
+<dialog class="nb" id="nyhedsbrev" popover="manual" aria-labelledby="nb-title">
+  <button type="button" class="nb-close" aria-label="Luk">
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+  </button>
+  <h2 id="nb-title">Modtag opdateringer og nyheder fra Affaldsviden på mail!</h2>
+  <div class="nb-signup">
+    <form class="nb-form" id="nb-form">
+      <label class="sr-only" for="nb-email">E-mailadresse</label>
+      <div class="nb-row">
+        <input id="nb-email" name="email" type="email" required autocomplete="email" placeholder="E-mailadresse" aria-invalid="false">
+        <button type="submit">Tilmeld</button>
+      </div>
+      <p class="nb-error" id="nb-error">
+        <svg width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Fejl"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M8 4.5v4.2M8 11.2v.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Skriv en gyldig e-mailadresse, fx navn@kommune.dk.
+      </p>
+    </form>
+    <p class="nb-small">Læs vores <a href="https://affaldsviden.info/wp-content/uploads/2025/06/Privatlivspolitik-for-Affaldsviden-250617.pdf">privatlivspolitik</a>, hvis du vil vide mere.</p>
+  </div>
+  <p class="nb-done" id="nb-done" role="status"></p>
+</dialog>
+
+<button type="button" class="nb-tab" id="nb-tab">
+  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+  Nyhedsbrev
+</button>
+
+<div class="mockup-bar" role="region" aria-label="Mockup">
+  <strong>Mockup</strong>
+  <a href="https://affaldsviden.info/nyheder/">Nuværende side ↗</a>
+  <button type="button" id="nb-reset">Vis popup igen</button>
+</div>
+
+<script>
+  const UPLOADS = 'https://affaldsviden.info/wp-content/uploads/';
+
+  // Teksterne er de nuværende nyhedstekster. "her"-links er erstattet af en knap med en beskrivende tekst.
+  const NEWS = [
+    {
+      id: 'nyhedsfeed', date: '2026-10-27',
+      title: 'Nyhedsfeed tilføjet på Affaldsviden',
+      img: '2026/10/Skaermbillede-2026-10-27-150902.png', pos: 'left top',
+      teaser: 'Affaldsviden har fået et nyhedsfeed, hvor man kan følge med i nyhedsstrømmen på affaldsområdet. Nyhederne kommer bl.a. fra medier, myndigheder, Folketinget, kommuner, affaldsselskaber, tænketanke, NGO’er og universiteter.',
+      more: ['Formålet er at give et klart overblik over, hvad der sker på affaldsområdet. Man kan fx følge bestemte emner som økonomi, lovgivning, forskning og ordninger samt se, hvad der sker i ens lokalområde. I underfanen ”Nyhedsoverblik” opsummerer vi kort, hvad der er sket i dag og den seneste uge, måned og år. Under ”Højdepunkter” findes en tidslinje over de store linjer på affaldsområdet, f.eks. ny lovgivning, politiske aftaler og større beslutninger. Under ”Affaldskort” findes et samlet, visuelt overblik tilbage i tiden over offentlige dokumenter, artikler med mere.'],
+      cta: { label: 'Gå til Affaldsfeed', href: 'https://affaldsviden.info/affaldsfeed/' },
+    },
+    {
+      id: 'datadag', date: '2025-11-28', event: '2026-01-14',
+      title: 'Affaldsdatadag 14/01-2026',
+      img: '2025/11/Skaermbillede-2025-11-28-095020.png', pos: 'center 62%',
+      teaser: 'JHN Processor og Brancheforeningen Cirkulær afholder Affaldsdatadag d. 14/01-2026. Dagen sætter fokus på, hvordan vi optimerer brugen af data på affaldsområdet – fra henteordninger og genbrugspladser til borgerkommunikation, digitale løsninger og rapportering.',
+      more: ['Første del af dagen er åben for alle. Vi gennemgår mængder og ordninger for de 10 fraktioner på tværs af boligtyper, ser på lokal udvikling hos bl.a. Vestforbrænding, arbejder med data fra genbrugspladser og undersøger, hvordan målrettet formidling kan ændre borgeradfærd. Anden del er et møde for brugere af Affaldsviden og medlemmer af Brancheforeningen Cirkulær. Her fokuserer vi på, hvordan data kan bruges aktivt i driften – fx i rapportering, tømningsvægte, API-løsninger, klimadata og opgørelser af reel genanvendelse.'],
+      cta: { label: 'Se arrangementet', href: 'https://cirkulaer.dk/arrangementer/affaldsdatadag-2026', ext: true },
+    },
+    {
+      id: 'forbraending', date: '2025-10-06',
+      title: 'Kortlægning af afsætning af forbrændingsegnet affald',
+      img: '2025/10/Forbraendingsegnet-affald.png', pos: 'center',
+      teaser: 'På baggrund af ny lovgivning er det forbrændingsegnede affald fra både henteordninger og genbrugspladser blevet konkurrenceudsat. Som følge heraf er affaldsforbrændingssektoren blevet omorganiseret.',
+      more: [
+        'I løbet af det seneste år har mange kommuner derfor sendt deres forbrændingsegnede affald i udbud for at leve op til fristen den 1. juli 2025, hvor affaldet senest skulle være konkurrenceudsat.',
+        'Brancheforeningen Cirkulær har i den forbindelse gennemført en kortlægning af, hvilke affaldsforbrændingsselskaber de enkelte kommuner fremover afsætter deres mængder til.',
+      ],
+      cta: { label: 'Se kortlægningen', href: 'https://affaldsviden.info/affaldsordninger-2-0/udbud-af-forbraendingsegnet-affald-2025/' },
+    },
+    {
+      id: 'statistik2023', date: '2025-10-06',
+      title: 'Affaldsstatistik 2023',
+      img: '2025/10/AV-notat.png', pos: 'left top',
+      teaser: 'Miljøstyrelsen har i juli 2025 offentliggjort affaldsstatistikken for 2023, som blandt andet indeholder Pejlemærket for reel genanvendelse af husholdningsaffald.',
+      more: ['Vi beregner årligt et tilsvarende nøgletal for reel genanvendelse, og vi kan konstatere, at der kan være væsentlige afvigelser mellem de to beregninger. I notatet belyser vi nogle af de forskelle i metode og datagrundlag, som kan være årsag til afvigelserne.'],
+      cta: { label: 'Læs notatet (PDF)', href: 'https://affaldsviden.info/wp-content/uploads/2025/10/Notat-om-Affaldsstatistik-2023-251006-AV.pdf' },
+    },
+    {
+      id: 'netvaerk', date: '2025-06-18',
+      title: 'Brug dit netværk på Affaldsviden',
+      img: '2025/09/7da0b64c-3509-4165-8282-1a5cfd3b205a.png', pos: 'center',
+      teaser: 'Affaldsviden har fået en ny netværksside! Her kan du række ud til dine kollegaer i affaldsbranchen med spørgsmål, idéer eller gode råd.',
+      more: [
+        'Målet er at skabe et åbent og hjælpsomt forum, som skal gøre det lettere for affaldsselskaber og kommuner at dele erfaringer, stille spørgsmål og finde løsninger sammen. Vi ved, at mange står med de samme udfordringer – og der er ingen grund til at opfinde den dybe tallerken flere gange.',
+        'Vi håber, at I vil tage godt imod siden og bruge den, så den bliver et værdifult rum til at drøfte affaldsrelaterede problemstillinger.',
+      ],
+      cta: { label: 'Skriv dit første opslag', href: 'https://affaldsviden.info/netvaerk/' },
+    },
+    {
+      id: 'upa', date: '2025-06-01',
+      title: 'Kortlægning af gebyrer for det udvidede producentansvar',
+      img: '2025/06/Skaermbillede-2025-06-20-114719.png', pos: 'center',
+      teaser: 'Vi har kortlagt gebyrerne for det udvidede producentansvar (UPA) for emballageaffald for perioden oktober til december 2025.',
+      more: ['På dashboardet findes en samlet oversigt over gebyrerne – herunder for henteordninger, genbrugspladser og på fraktionsniveau, hvis det fremgår af kommunernes eller affaldsselskabernes hjemmesider.'],
+      cta: { label: 'Se kortlægningen', href: 'https://dashboard.affaldsviden.info/superset/dashboard/146/' },
+    },
+    {
+      id: 'genbrug', date: '2025-06-01',
+      title: 'Dashboard for direkte genbrug på Affaldsviden',
+      img: '2025/05/1000005773-1024x768.jpg', pos: 'center',
+      teaser: 'Vi har oprettet et nyt dashboard på Affaldsviden specifikt med mængder for direkte genbrug – altså materialer og produkter, der genbruges i deres oprindelige form uden først at blive forarbejdet.',
+      more: [
+        'Mængder af direkte genbrug er svære at indsamle, og mængderne på dashboardet er derfor i flere tilfælde estimerede på baggrund af undersøgelser, som opskaleres ud fra eksempelvis besøgstal.',
+        'Der skelnes mellem direkte genbrug og forberedelse med henblik på genbrug. Det nye dashboard indeholder kun mængder af direkte genbrug, mens affald der forberedes med henblik på genbrug fortsat kan findes på Nøgletalsmodellen. Se <a href="https://affaldsviden.info/wp-content/uploads/2024/09/Genbrug-notat-240624.pdf">notatet (PDF)</a> for en nærmere beskrivelse af de to begreber.',
+      ],
+      cta: { label: 'Åbn dashboardet', href: 'https://affaldsviden.info/noegletal2/' },
+    },
+    {
+      id: 'landsgennemsnit', date: '2025-06-01',
+      title: 'Landsgennemsnit på Affaldsviden',
+      img: '2025/06/Skaermbillede-2025-06-03-101341-1024x764.png', pos: 'left top',
+      teaser: 'På Nøgletalsmodellen er det nu muligt at se en række landsgennemsnit. Brug filtrene til at specificere gennemsnittene efter for eksempel fraktioner, affaldstyper, behandlingsprocesser, regioner eller år.',
+      more: [],
+      cta: { label: 'Se landsgennemsnit', href: 'https://dashboard.affaldsviden.info/superset/dashboard/186/' },
+    },
+    {
+      id: 'erhverv', date: '2025-06-01',
+      title: 'Registrering af erhvervsaffald på Affaldsviden',
+      img: '2025/06/Skaermbillede-2025-06-18-134402.png', pos: 'center',
+      teaser: 'Efter lovændringen i 2022, som tillader kommuner at indsamle genanvendeligt affald fra virksomheder svarende i art og mængde til husholdningsaffald, har vi gjort det muligt at adskille erhvervsaffald fra husholdningsaffald i henteordninger.',
+      more: [
+        'Det betyder, at vi på Affaldsviden.dk for 2023 og fremadrettet kan opdele mængder fra husholdninger og erhverv mere præcist – helt ned på fraktionsniveau. Erhverv omfatter her steder med erhvervsaktivitet dvs. private virksomheder og kommunale institutioner som børnehaver, skoler og rådhuse.',
+        'Opdelingen mellem husholdnings- og erhvervsandele sker ved at beregne den årlige tømningsvolumen. Beregningen baseres på oplysninger om beholdertyper og -antal, tømningsfrekvens, de indsamlede affaldsfraktioner samt om adressen anvendes til husholdning eller erhvervsaktivitet.',
+        'Forbedringen bidrager til et mere retvisende og detaljeret datagrundlag i analyser af husholdningsaffald, fordi affald fra erhvervsmæssige aktiviteter kan frasorteres. Det forudsætter, at kommuner og affaldsselskaber kan skelne mellem tømninger fra husholdninger og erhverv i deres systemer.',
+      ],
+      cta: { label: 'Gå til Nøgletalsmodellen', href: 'https://affaldsviden.info/noegletal2/' },
+    },
+  ];
+
+  const ICON = {
+    chev: '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg>',
+  };
+
+  const dateFmt = new Intl.DateTimeFormat('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
+  const parseDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+
+  const listEl = document.getElementById('list');
+  const sortEl = document.getElementById('sort');
+  const statusEl = document.getElementById('status');
+
+  // Alle nyheder har samme opbygning: billede, dato, titel og så meget tekst, som der er plads til.
+  // "Læs mere" folder resten af teksten og knappen videre ud.
+  function cardHTML(n, i) {
+    // Lille tekst ved musen, så man ved, hvor man ender (fx en PDF eller en anden hjemmeside)
+    const tip = n.cta.ext ? `${n.cta.label} på ${new URL(n.cta.href).hostname}` : n.cta.label;
+    // Arrangementer markeres automatisk som afholdt, når datoen er passeret
+    const held = n.event && parseDate(n.event) < TODAY;
+    return `
+      <article class="card" aria-labelledby="title-${n.id}">
+        <a class="thumb" href="${n.cta.href}" title="${tip}" tabindex="-1" aria-hidden="true"><img src="${UPLOADS + n.img}" alt="" style="object-position:${n.pos}" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}>${held ? '<span class="stamp">Afholdt</span>' : ''}</a>
+        <header>
+          <h2 id="title-${n.id}"><a href="${n.cta.href}" title="${tip}">${n.title}</a></h2>
+          <time class="date" datetime="${n.date}">${dateFmt.format(parseDate(n.date))}</time>${held ? `<span class="sr-only">Arrangementet blev afholdt ${dateFmt.format(parseDate(n.event))}.</span>` : ''}
+        </header>
+        <div class="content">
+          <div class="body" id="body-${n.id}">
+            <span class="slot" aria-hidden="true"></span>
+            ${[n.teaser, ...n.more].map((p) => `<p>${p}</p>`).join('')}
+            <div class="foot">
+              <p class="cta"><a class="go" href="${n.cta.href}">${n.cta.label}<span class="sr-only">: ${n.title}</span></a></p>
+              <button type="button" class="toggle" aria-expanded="false" aria-controls="body-${n.id}">
+                <span class="dots" aria-hidden="true">…</span><span class="lbl">Læs mere</span><span class="sr-only"> om ${n.title}</span>${ICON.chev}
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>`;
+  }
+
+  // Viser "…" når teksten er skåret af, og holder links i den skjulte del af teksten uden for Tab-rækkefølgen
+  function refreshCards() {
+    listEl.querySelectorAll('.card').forEach((card) => {
+      const body = card.querySelector('.body');
+      const open = card.classList.contains('is-open');
+      card.classList.remove('no-more');   // mål med pladsen til "Læs mere"
+      const bottom = body.getBoundingClientRect().bottom;
+      const texts = body.querySelectorAll(':scope > p');
+      const clamped = !open && texts[texts.length - 1].getBoundingClientRect().bottom > bottom + 1;
+      card.classList.toggle('is-clamped', clamped);
+      card.classList.toggle('no-more', !open && !clamped);
+      body.querySelectorAll(':scope > p:not(.cta) a').forEach((a) => {
+        if (!open && a.getBoundingClientRect().top >= bottom - 1) a.setAttribute('tabindex', '-1');
+        else a.removeAttribute('tabindex');
+      });
+    });
+  }
+
+  function setOpen(card, open) {
+    card.classList.toggle('is-open', open);
+    const btn = card.querySelector('.toggle');
+    btn.setAttribute('aria-expanded', String(open));
+    btn.querySelector('.lbl').textContent = open ? 'Vis mindre' : 'Læs mere';
+    refreshCards();
+  }
+
+  listEl.innerHTML = NEWS.map((n, i) =>
+    `<li class="news-item" data-date="${n.date}" data-order="${i}">${cardHTML(n, i)}</li>`).join('');
+
+  listEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.toggle');
+    if (!btn) return;
+    const card = btn.closest('.card');
+    const open = !card.classList.contains('is-open');
+    setOpen(card, open);
+    // Når en lang nyhed lukkes, skal man ikke ende langt under den
+    if (!open && card.getBoundingClientRect().top < 0) card.scrollIntoView({ block: 'nearest' });
+  });
+
+  // Sortering flytter de eksisterende nyheder, så en åben nyhed forbliver åben
+  function reorder(container, nodes) {
+    const move = Object.hasOwn(Element.prototype, 'moveBefore')
+      ? (node) => container.moveBefore(node, null)
+      : (node) => container.append(node);
+    for (const node of nodes) move(node);
+  }
+
+  function sortNews(order) {
+    const nodes = [...listEl.children].sort((a, b) => {
+      const byDate = (a.dataset.date > b.dataset.date) - (a.dataset.date < b.dataset.date);
+      const byOrder = a.dataset.order - b.dataset.order;
+      return order === 'oldest' ? (byDate || -byOrder) : (-byDate || byOrder);
+    });
+    const update = () => reorder(listEl, nodes);
+    if (listEl.startViewTransition) listEl.startViewTransition(update);
+    else if (document.startViewTransition) document.startViewTransition(update);
+    else update();
+    statusEl.textContent = `Sorteret med ${order === 'oldest' ? 'ældste' : 'nyeste'} først, ${nodes.length} nyheder`;
+  }
+
+  sortEl.addEventListener('change', () => sortNews(sortEl.value));
+
+  refreshCards();
+  document.fonts.ready.then(refreshCards);
+  let rafId = 0;
+  new ResizeObserver(() => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(refreshCards); }).observe(listEl);
+
+  // ---------- Nyhedsbrev: lille boks i hjørnet, der lægges væk som en fane ----------
+  const nb = document.getElementById('nyhedsbrev');
+  const nbTab = document.getElementById('nb-tab');
+  const nbForm = document.getElementById('nb-form');
+  const nbEmail = document.getElementById('nb-email');
+  const nbSignup = nb.querySelector('.nb-signup');
+  const nbDone = document.getElementById('nb-done');
+  const NB_KEY = 'av-nyhedsbrev';   // tom: vis boksen, 'lukket': vis fanen, 'tilmeldt': vis intet
+  const canPopover = Object.hasOwn(HTMLElement.prototype, 'popover');
+
+  const nbState = () => { try { return localStorage.getItem(NB_KEY); } catch (e) { return null; } };
+  const setNbState = (v) => { try { if (v) localStorage.setItem(NB_KEY, v); else localStorage.removeItem(NB_KEY); } catch (e) { /* ignorer */ } };
+  const nbIsOpen = () => (canPopover ? nb.matches(':popover-open') : nb.open);
+  // Plads i bunden, så et element man tabber til, ikke ender skjult under boksen eller fanen
+  const setScrollRoom = (px) => { document.documentElement.style.scrollPaddingBottom = px ? `${px}px` : ''; };
+
+  function openNb(focus) {
+    const prev = document.activeElement;
+    nbTab.classList.remove('is-shown');
+    if (!nbIsOpen()) { if (canPopover) nb.showPopover(); else nb.show(); }
+    setScrollRoom(nb.offsetHeight + 36);
+    if (focus) { nbEmail.focus(); return; }
+    // Åbner boksen af sig selv, må den ikke tage fokus fra det, man er i gang med
+    if (nb.contains(document.activeElement)) {
+      if (prev && prev !== document.body && prev.isConnected) prev.focus({ preventScroll: true });
+      else document.activeElement.blur();
+    }
+  }
+
+  // Lukning med animation, også hvor browseren ikke kan animere ud af det øverste lag
+  let displayTransition;
+  function canTransitionDisplay() {
+    if (displayTransition !== undefined) return displayTransition;
+    if (!window.CSS?.supports?.('transition-behavior', 'allow-discrete')) return (displayTransition = false);
+    const probe = document.createElement('div');
+    probe.style.cssText = 'transition: display 1s allow-discrete !important; display: block;';
+    document.body.appendChild(probe);
+    getComputedStyle(probe).display;
+    probe.style.display = 'none';
+    displayTransition = getComputedStyle(probe).display === 'block';
+    probe.remove();
+    return displayTransition;
+  }
+  async function hideNb() {
+    if (!(window.CSS?.supports?.('overlay', 'auto') && canTransitionDisplay())) {
+      nb.setAttribute('data-closing', '');
+      const animations = nb.getAnimations({ subtree: true });
+      if (animations.length) await Promise.race([Promise.allSettled(animations.map((a) => a.finished)), new Promise((r) => setTimeout(r, 1000))]);
+      if (!nb.hasAttribute('data-closing')) return;
+      nb.removeAttribute('data-closing');
+    }
+    if (canPopover) nb.hidePopover(); else nb.close();
+  }
+
+  function minimizeNb() {
+    const hadFocus = nb.contains(document.activeElement);
+    hideNb();
+    if (nbState() === 'tilmeldt') { setScrollRoom(0); return; }
+    setNbState('lukket');
+    nbTab.classList.add('is-shown');
+    setScrollRoom(72);
+    if (hadFocus) nbTab.focus();
+  }
+
+  nb.querySelector('.nb-close').addEventListener('click', minimizeNb);
+  nb.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); minimizeNb(); } });
+  nbTab.addEventListener('click', () => openNb(true));
+  // "her" i introen åbner den samme boks i stedet for en anden side (linket virker stadig uden JavaScript)
+  document.querySelector('.intro a').addEventListener('click', (e) => { e.preventDefault(); openNb(true); });
+
+  // aria-invalid følger :user-invalid, og fejlteksten kobles kun på feltet, mens den vises
+  const syncEmail = () => {
+    const invalid = nbEmail.matches(':user-invalid');
+    nbEmail.setAttribute('aria-invalid', String(invalid));
+    if (invalid) nbEmail.setAttribute('aria-describedby', 'nb-error');
+    else nbEmail.removeAttribute('aria-describedby');
+  };
+  nbEmail.addEventListener('blur', syncEmail);
+  nbEmail.addEventListener('input', syncEmail);
+  // Browserens egen boble ("Please include an '@' …") følger browserens sprog og kan være engelsk.
+  // Den slås fra, så man kun ser den danske fejltekst under feltet.
+  nbEmail.addEventListener('invalid', (e) => {
+    e.preventDefault();
+    nbEmail.focus();
+    requestAnimationFrame(syncEmail);
+  });
+
+  // Kun en mockup: intet sendes. Der vises bare takken fra den nuværende popup.
+  nbForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    nbSignup.hidden = true;
+    nbDone.textContent = 'Tak for din tilmelding. Tjek din indbakke eller spam mappe for at bekræfte din tilmelding.';
+    setNbState('tilmeldt');
+  });
+
+  document.getElementById('nb-reset').addEventListener('click', () => {
+    setNbState(null);
+    nbForm.reset();
+    nbSignup.hidden = false;
+    nbDone.textContent = '';
+    syncEmail();
+    openNb(false);
+  });
+
+  // Boksen er foldet ud fra start. Folder man den ind, ses kun fanen, også næste gang.
+  if (nbState() === 'lukket') { nbTab.classList.add('is-shown'); setScrollRoom(72); }
+  else if (nbState() !== 'tilmeldt') openNb(false);
+</script>
+</body>
+</html>
